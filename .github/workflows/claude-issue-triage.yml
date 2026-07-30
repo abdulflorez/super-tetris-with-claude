@@ -36,7 +36,7 @@ jobs:
 
             Haz lo siguiente:
 
-            1. Lee el título y cuerpo del issue, y revisa el código relevante del repositorio para entender el contexto (por ejemplo, si mencionan rotación de piezas, revisa la lógica de rotación en game.js; si mencionan estilos, revisa style.css, etc.).
+            1. Lee el título y cuerpo del issue. Antes de tocar código, revisa `CLAUDE.md` en la raíz del repo para entender la arquitectura (qué hace cada archivo y las funciones clave de `game.js`: `collide`, `tryRotate`/`rotateCW`, `lockPiece`/`merge`/`clearLines`, `spawn`, `ghostY`, `draw`/`drawNext`, el listener de `keydown`, y las constantes ajustables al inicio del archivo). Usa esa guía para ubicar con precisión qué función(es) están relacionadas con lo reportado (p. ej. un bug de rotación probablemente está en `tryRotate`/`rotateCW`; de colisión en `collide`; de puntaje/niveles en `clearLines`; de fantasma/hard-drop en `ghostY`; de estilos en `style.css`; de estructura/controles en `index.html`).
 
             2. Determina las etiquetas (labels) apropiadas para clasificar el issue:
                - Tipo: bug, feature, question, documentation (elige la que aplique).
