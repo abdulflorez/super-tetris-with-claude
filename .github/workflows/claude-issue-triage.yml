@@ -49,6 +49,7 @@ jobs:
                - Archivos y áreas del código involucradas.
                - Un esbozo del posible enfoque de solución (sin implementarlo).
                No escribas ni propongas código completo, solo el diagnóstico técnico que el equipo usará después para implementar la solución.
+               El comentario debe estar escrito en formato Markdown válido para que GitHub lo renderice correctamente (usa encabezados, listas y bloques de código con backticks para nombres de archivo/función según corresponda).
 
                Antes de publicar, revisa los comentarios existentes del issue con `gh issue view ${{ github.event.issue.number }} --comments`. Si ya existe un comentario tuyo (de este mismo bot) con un diagnóstico anterior, actualízalo con `gh issue comment ${{ github.event.issue.number }} --edit-last --body "..."` en lugar de crear uno nuevo, para no duplicar comentarios cuando el issue se edite varias veces. Si no existe un comentario previo tuyo, crea uno nuevo.
           # Ver https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
