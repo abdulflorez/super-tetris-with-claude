@@ -1,0 +1,55 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+concurrency:
+  group: claude-issue-triage-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Issue Triage
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--allowed-tools "Bash(gh label:*),Bash(gh issue:*)"'
+          prompt: |
+            Analiza el issue #${{ github.event.issue.number }} ("${{ github.event.issue.title }}") de este repositorio (un juego de Tetris en HTML/CSS/JavaScript vanilla, sin build tools: game.js, index.html, style.css).
+
+            Cuerpo del issue:
+            """
+            ${{ github.event.issue.body }}
+            """
+
+            Haz lo siguiente:
+
+            1. Lee el título y cuerpo del issue, y revisa el código relevante del repositorio para entender el contexto (por ejemplo, si mencionan rotación de piezas, revisa la lógica de rotación en game.js; si mencionan estilos, revisa style.css, etc.).
+
+            2. Determina las etiquetas (labels) apropiadas para clasificar el issue:
+               - Tipo: bug, feature, question, documentation (elige la que aplique).
+               - Área: gameplay, ui, performance, controls (si aplica alguna).
+               - Prioridad: priority-high, priority-medium, priority-low (solo si es evidente por la severidad descrita).
+               Si alguna de estas etiquetas no existe todavía en el repositorio, créala con `gh label create "<nombre>" --color "<hex>" --description "<descripción corta>"` usando colores y descripciones razonables. Luego asigna las etiquetas correspondientes al issue con `gh issue edit ${{ github.event.issue.number }} --add-label "<nombre>"`. No elimines etiquetas existentes en el issue a menos que sean claramente incorrectas para el contenido actual.
+
+            3. Publica un comentario en el issue con un diagnóstico general del problema (usa `gh issue comment ${{ github.event.issue.number }} --body "..."` o `--body-file`), que incluya:
+               - Causa probable del problema (o, si es una feature request, qué implica implementarla).
+               - Archivos y áreas del código involucradas.
+               - Un esbozo del posible enfoque de solución (sin implementarlo).
+               No escribas ni propongas código completo, solo el diagnóstico técnico que el equipo usará después para implementar la solución.
+
+               Antes de publicar, revisa los comentarios existentes del issue con `gh issue view ${{ github.event.issue.number }} --comments`. Si ya existe un comentario tuyo (de este mismo bot) con un diagnóstico anterior, actualízalo con `gh issue comment ${{ github.event.issue.number }} --edit-last --body "..."` en lugar de crear uno nuevo, para no duplicar comentarios cuando el issue se edite varias veces. Si no existe un comentario previo tuyo, crea uno nuevo.
+          # Ver https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
+          # o https://code.claude.com/docs/en/cli-reference para más opciones disponibles
