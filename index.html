@@ -8,6 +8,10 @@
 </head>
 <body>
   <div class="wrapper">
+    <button id="theme-toggle-btn" class="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to light mode" title="Switch to light mode">
+      <span id="theme-icon" class="theme-icon" aria-hidden="true">☀️</span>
+      <span id="theme-text" class="theme-text">LIGHT MODE</span>
+    </button>
     <h1 class="game-title">TETRIS</h1>
     <div class="game-container">
       <canvas id="board" width="300" height="600"></canvas>
@@ -40,10 +44,6 @@
             <li><kbd>Space</kbd> caída</li>
             <li><kbd>P</kbd> pausa</li>
           </ul>
-        </div>
-
-        <div class="panel-section">
-          <button id="theme-toggle-btn" aria-pressed="false">MODO CLARO</button>
         </div>
       </aside>
     </div>
