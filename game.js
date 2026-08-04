@@ -46,6 +46,8 @@ const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const themeIcon = document.getElementById('theme-icon');
+const themeText = document.getElementById('theme-text');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId, theme;
 
@@ -267,8 +269,13 @@ function loop(ts) {
 function applyTheme(t) {
   theme = t === 'light' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', theme);
-  themeToggleBtn.textContent = theme === 'light' ? 'MODO OSCURO' : 'MODO CLARO';
-  themeToggleBtn.setAttribute('aria-pressed', String(theme === 'light'));
+  const isLight = theme === 'light';
+  themeIcon.textContent = isLight ? '🌙' : '☀️';
+  themeText.textContent = isLight ? 'DARK MODE' : 'LIGHT MODE';
+  const label = isLight ? 'Switch to dark mode' : 'Switch to light mode';
+  themeToggleBtn.setAttribute('aria-label', label);
+  themeToggleBtn.setAttribute('title', label);
+  themeToggleBtn.setAttribute('aria-pressed', String(isLight));
   localStorage.setItem(THEME_STORAGE_KEY, theme);
   if (board) draw();
 }
