@@ -45,6 +45,24 @@
         <div class="panel-section">
           <button id="theme-toggle-btn" aria-pressed="false">MODO CLARO</button>
         </div>
+
+        <div class="panel-section records-section">
+          <span class="label">RECORDS</span>
+          <ol id="leaderboard-list" class="leaderboard-list">
+            <li class="leaderboard-empty">Sin registros</li>
+          </ol>
+          <div class="leaderboard-stats">
+            <div class="stat">
+              <span class="stat-label">Mejor combo</span>
+              <span class="stat-value" id="best-combo">0</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Máx. líneas</span>
+              <span class="stat-value" id="max-lines">0</span>
+            </div>
+          </div>
+          <button id="reset-records-btn" class="reset-btn">Reiniciar récords</button>
+        </div>
       </aside>
     </div>
 
@@ -52,6 +70,10 @@
       <div class="overlay-box">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
+        <div id="overlay-save" class="overlay-save hidden">
+          <input type="text" id="name-input" class="name-input" placeholder="Tu nombre" maxlength="12" autocomplete="off" />
+          <button id="save-score-btn">Guardar</button>
+        </div>
         <button id="restart-btn">Reiniciar</button>
       </div>
     </div>

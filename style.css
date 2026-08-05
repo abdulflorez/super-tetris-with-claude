@@ -161,6 +161,156 @@ kbd {
   background: var(--panel-border);
 }
 
+/* ---- Records / Leaderboard ---- */
+.records-section {
+  border-top: 1px solid var(--panel-border);
+  padding-top: 16px;
+}
+
+.leaderboard-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  counter-reset: leaderboard;
+}
+
+.leaderboard-row {
+  counter-increment: leaderboard;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  color: var(--text);
+}
+
+.leaderboard-row::before {
+  content: counter(leaderboard) '.';
+  color: var(--label);
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.leaderboard-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-score {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.leaderboard-row.highlight {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  outline: 1px solid var(--accent);
+}
+
+.leaderboard-empty {
+  font-size: 12px;
+  color: var(--label);
+  font-style: italic;
+}
+
+.leaderboard-stats {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-label {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--label);
+  font-weight: 600;
+}
+
+.stat-value {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.reset-btn {
+  margin-top: 4px;
+  background: transparent;
+  color: var(--control-text);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.reset-btn:hover {
+  background: var(--panel-border);
+  color: var(--text);
+}
+
+/* ---- Guardar puntuación (overlay) ---- */
+.overlay-save {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.overlay-save.hidden {
+  display: none;
+}
+
+.name-input {
+  background: var(--board-bg);
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  width: 120px;
+}
+
+.name-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+#save-score-btn {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.15s;
+}
+
+#save-score-btn:hover {
+  background: var(--accent-hover);
+}
+
+#save-score-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ---- Overlay ---- */
 .overlay {
   position: absolute;
