@@ -185,6 +185,30 @@ kbd {
   white-space: nowrap;
 }
 
+/* ---- Selector de skin ---- */
+#skin-select {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 1px;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+
+#skin-select:hover {
+  background: var(--panel-border);
+}
+
+#skin-select option {
+  background: var(--bg);
+  color: var(--text);
+}
+
 /* ---- Overlay ---- */
 .overlay {
   position: absolute;
