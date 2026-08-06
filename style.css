@@ -111,11 +111,77 @@ body {
   letter-spacing: 1px;
 }
 
+.skin-select {
+  background: var(--kbd-bg);
+  color: var(--text);
+  border: 1px solid var(--kbd-border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.skin-select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 #next-canvas {
   display: block;
   border: 1px solid var(--panel-border);
   background: var(--board-bg);
   border-radius: 4px;
+}
+
+/* ---- Récords ---- */
+.records-list {
+  list-style: decimal;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.records-list .records-empty {
+  list-style: none;
+  padding-left: 0;
+  color: var(--control-text);
+  font-style: italic;
+}
+
+.records-list li.highlight {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.records-extra {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--control-text);
+  margin-top: 4px;
+}
+
+.reset-records-btn {
+  margin-top: 6px;
+  background: transparent;
+  color: var(--control-text);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.reset-records-btn:hover {
+  background: var(--panel-border);
+  color: var(--text);
 }
 
 /* ---- Controles ---- */
@@ -222,7 +288,47 @@ kbd {
   color: var(--accent);
 }
 
-#restart-btn {
+.overlay-newrecord,
+.overlay-records {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.overlay-newrecord.hidden,
+.overlay-records.hidden {
+  display: none;
+}
+
+.overlay-newrecord-label {
+  font-size: 13px;
+  color: var(--overlay-title);
+  font-weight: 700;
+}
+
+#player-name-input {
+  background: var(--board-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-size: 13px;
+  text-align: center;
+  width: 140px;
+}
+
+#player-name-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.overlay-records .records-list {
+  align-items: center;
+}
+
+.overlay-btn,
+#save-score-btn {
   margin-top: 8px;
   background: var(--accent);
   color: var(--accent-text);
@@ -236,6 +342,101 @@ kbd {
   transition: background 0.15s;
 }
 
-#restart-btn:hover {
+.overlay-btn:hover,
+#save-score-btn:hover {
   background: var(--accent-hover);
+}
+
+.overlay-btn.secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+}
+
+.overlay-btn.secondary:hover {
+  background: var(--panel-border);
+}
+
+/* ---- Menu de pausa ---- */
+.pause-menu {
+  width: 220px;
+}
+
+#pause-title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: var(--accent);
+}
+
+.pause-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.pause-menu-actions .overlay-btn {
+  margin-top: 0;
+  width: 100%;
+}
+
+.pause-controls-panel {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--board-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+}
+
+.pause-controls-panel.hidden {
+  display: none;
+}
+
+.pause-controls-panel ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pause-controls-panel li {
+  font-size: 12px;
+  color: var(--control-text);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pause-level-select {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.pause-level-select label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--label);
+  font-weight: 600;
+}
+
+.pause-level-select select {
+  width: 100%;
+  background: var(--kbd-bg);
+  color: var(--text);
+  border: 1px solid var(--kbd-border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.pause-level-hint {
+  font-size: 10px;
+  color: var(--control-text);
 }

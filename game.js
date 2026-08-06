@@ -34,6 +34,96 @@ const THEMES = {
   light: { grid: '#dcdce6', highlight: 'rgba(0,0,0,0.10)' },
 };
 
+const SKIN_STORAGE_KEY = 'tetris-skin';
+const SKINS = {
+  retro: {
+    label: 'Retro',
+    colors: COLORS,
+    boardBg: null,
+    drawBlock(context, x, y, colorIndex, size, alpha) {
+      const px = x * size + 1, py = y * size + 1, s = size - 2;
+      context.globalAlpha = alpha ?? 1;
+      context.fillStyle = this.colors[colorIndex];
+      context.fillRect(px, py, s, s);
+      context.fillStyle = THEMES[theme].highlight;
+      context.fillRect(px, py, s, 4);
+      context.globalAlpha = 1;
+    },
+  },
+  neon: {
+    label: 'Neon',
+    colors: [null, '#00e5ff', '#fff176', '#e040fb', '#69f0ae', '#ff5252', '#448aff', '#ffab40'],
+    boardBg: '#000000',
+    gridColor: 'rgba(255,255,255,0.07)',
+    drawBlock(context, x, y, colorIndex, size, alpha) {
+      const px = x * size + 1, py = y * size + 1, s = size - 2;
+      const color = this.colors[colorIndex];
+      context.save();
+      context.globalAlpha = alpha ?? 1;
+      context.shadowColor = color;
+      context.shadowBlur = 14;
+      context.fillStyle = color;
+      context.fillRect(px, py, s, s);
+      context.shadowBlur = 0;
+      context.strokeStyle = 'rgba(255,255,255,0.65)';
+      context.lineWidth = 1;
+      context.strokeRect(px + 0.5, py + 0.5, s - 1, s - 1);
+      context.restore();
+    },
+  },
+  pastel: {
+    label: 'Pastel',
+    colors: [null, '#a8dadc', '#ffe8a3', '#d8bbf3', '#b8e3c2', '#f7b8b8', '#b8d4f7', '#f7d0a8'],
+    boardBg: null,
+    drawBlock(context, x, y, colorIndex, size, alpha) {
+      const px = x * size + 1, py = y * size + 1, s = size - 2;
+      const r = Math.min(6, s / 3);
+      context.globalAlpha = alpha ?? 1;
+      context.fillStyle = this.colors[colorIndex];
+      context.beginPath();
+      if (context.roundRect) {
+        context.roundRect(px, py, s, s, r);
+      } else {
+        context.moveTo(px + r, py);
+        context.arcTo(px + s, py, px + s, py + s, r);
+        context.arcTo(px + s, py + s, px, py + s, r);
+        context.arcTo(px, py + s, px, py, r);
+        context.arcTo(px, py, px + s, py, r);
+        context.closePath();
+      }
+      context.fill();
+      context.globalAlpha = 1;
+    },
+  },
+  pixel: {
+    label: 'Pixel Art',
+    colors: COLORS,
+    boardBg: null,
+    drawBlock(context, x, y, colorIndex, size, alpha) {
+      const px = x * size + 1, py = y * size + 1, s = size - 2;
+      context.globalAlpha = alpha ?? 1;
+      context.fillStyle = this.colors[colorIndex];
+      context.fillRect(px, py, s, s);
+      const cell = Math.max(2, Math.floor(s / 4));
+      context.fillStyle = 'rgba(0,0,0,0.18)';
+      for (let ty = 0; ty < s; ty += cell) {
+        for (let tx = 0; tx < s; tx += cell) {
+          if (((tx / cell + ty / cell) % 2) === 0) {
+            context.fillRect(px + tx, py + ty, cell, cell);
+          }
+        }
+      }
+      context.strokeStyle = 'rgba(0,0,0,0.45)';
+      context.lineWidth = 1;
+      context.strokeRect(px + 0.5, py + 0.5, s - 1, s - 1);
+      context.globalAlpha = 1;
+    },
+  },
+};
+
+const SCORES_STORAGE_KEY = 'tetris-highscores';
+const MAX_SCORES = 5;
+
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next-canvas');
@@ -48,8 +138,29 @@ const restartBtn = document.getElementById('restart-btn');
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const themeIcon = document.getElementById('theme-icon');
 const themeText = document.getElementById('theme-text');
+const skinSelect = document.getElementById('skin-select');
+const pauseOverlay = document.getElementById('pause-overlay');
+const resumeBtn = document.getElementById('resume-btn');
+const restartMenuBtn = document.getElementById('restart-menu-btn');
+const controlsToggleBtn = document.getElementById('controls-toggle-btn');
+const pauseControlsPanel = document.getElementById('pause-controls-panel');
+const startLevelSelect = document.getElementById('start-level-select');
 
-let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId, theme;
+const recordsListEl = document.getElementById('records-list');
+const bestComboEl = document.getElementById('best-combo');
+const maxLinesEl = document.getElementById('max-lines');
+const resetRecordsBtn = document.getElementById('reset-records-btn');
+
+const overlayNewRecord = document.getElementById('overlay-newrecord');
+const playerNameInput = document.getElementById('player-name-input');
+const saveScoreBtn = document.getElementById('save-score-btn');
+const overlayRecords = document.getElementById('overlay-records');
+const overlayRecordsList = document.getElementById('overlay-records-list');
+const overlayBestCombo = document.getElementById('overlay-best-combo');
+const overlayMaxLines = document.getElementById('overlay-max-lines');
+
+let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId, theme, skin, startLevel;
+let combo, maxCombo, pendingScore;
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -113,11 +224,15 @@ function clearLines() {
     }
   }
   if (cleared) {
+    combo++;
+    maxCombo = Math.max(maxCombo, combo);
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
+    level = startLevel + Math.floor(lines / 10);
     dropInterval = Math.max(100, 1000 - (level - 1) * 90);
     updateHUD();
+  } else {
+    combo = 0;
   }
 }
 
@@ -167,18 +282,11 @@ function updateHUD() {
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
-  context.globalAlpha = alpha ?? 1;
-  context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = THEMES[theme].highlight;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
-  context.globalAlpha = 1;
+  SKINS[skin].drawBlock(context, x, y, colorIndex, size, alpha);
 }
 
 function drawGrid() {
-  ctx.strokeStyle = THEMES[theme].grid;
+  ctx.strokeStyle = SKINS[skin].gridColor || THEMES[theme].grid;
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -227,25 +335,137 @@ function drawNext() {
       drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
 }
 
+function loadRecords() {
+  try {
+    const raw = localStorage.getItem(SCORES_STORAGE_KEY);
+    if (!raw) return { scores: [], bestCombo: 0, maxLines: 0 };
+    const parsed = JSON.parse(raw);
+    return {
+      scores: Array.isArray(parsed.scores) ? parsed.scores.slice(0, MAX_SCORES) : [],
+      bestCombo: Number(parsed.bestCombo) || 0,
+      maxLines: Number(parsed.maxLines) || 0,
+    };
+  } catch {
+    return { scores: [], bestCombo: 0, maxLines: 0 };
+  }
+}
+
+function saveRecords(records) {
+  localStorage.setItem(SCORES_STORAGE_KEY, JSON.stringify(records));
+}
+
+function qualifiesForTop(records, candidateScore) {
+  return records.scores.length < MAX_SCORES ||
+    candidateScore > records.scores[records.scores.length - 1].score;
+}
+
+function renderRecordsInto(listEl, comboEl, linesEl2, records, highlightIndex) {
+  listEl.innerHTML = '';
+  if (records.scores.length === 0) {
+    const li = document.createElement('li');
+    li.className = 'records-empty';
+    li.textContent = 'Sin récords aún';
+    listEl.appendChild(li);
+  } else {
+    records.scores.forEach((entry, i) => {
+      const li = document.createElement('li');
+      li.textContent = `${entry.name} — ${entry.score.toLocaleString()}`;
+      if (i === highlightIndex) li.classList.add('highlight');
+      listEl.appendChild(li);
+    });
+  }
+  comboEl.textContent = records.bestCombo;
+  linesEl2.textContent = records.maxLines;
+}
+
+function renderAllRecords(highlightIndex = -1) {
+  const records = loadRecords();
+  renderRecordsInto(recordsListEl, bestComboEl, maxLinesEl, records, -1);
+  renderRecordsInto(overlayRecordsList, overlayBestCombo, overlayMaxLines, records, highlightIndex);
+}
+
+function saveScoreEntry() {
+  const rawName = playerNameInput.value.trim().slice(0, 12);
+  const name = rawName || 'AAA';
+  const records = loadRecords();
+  const entry = { name, score, lines, level };
+  records.scores.push(entry);
+  records.scores.sort((a, b) => b.score - a.score);
+  records.scores = records.scores.slice(0, MAX_SCORES);
+  records.bestCombo = Math.max(records.bestCombo, maxCombo);
+  records.maxLines = Math.max(records.maxLines, lines);
+  saveRecords(records);
+
+  pendingScore = null;
+  overlayNewRecord.classList.add('hidden');
+  overlayRecords.classList.remove('hidden');
+  const highlightIndex = records.scores.indexOf(entry);
+  renderRecordsInto(overlayRecordsList, overlayBestCombo, overlayMaxLines, records, highlightIndex);
+  renderRecordsInto(recordsListEl, bestComboEl, maxLinesEl, records, -1);
+}
+
+function resetRecords() {
+  if (!window.confirm('¿Seguro que quieres borrar todos los récords?')) return;
+  saveRecords({ scores: [], bestCombo: 0, maxLines: 0 });
+  renderAllRecords();
+}
+
 function endGame() {
   gameOver = true;
   cancelAnimationFrame(animId);
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
+
+  const records = loadRecords();
+  records.bestCombo = Math.max(records.bestCombo, maxCombo);
+  records.maxLines = Math.max(records.maxLines, lines);
+  saveRecords(records);
+
+  pendingScore = qualifiesForTop(records, score) ? score : null;
+  if (pendingScore !== null) {
+    overlayNewRecord.classList.remove('hidden');
+    overlayRecords.classList.add('hidden');
+    playerNameInput.value = '';
+    setTimeout(() => playerNameInput.focus(), 0);
+  } else {
+    overlayNewRecord.classList.add('hidden');
+    overlayRecords.classList.remove('hidden');
+    renderRecordsInto(overlayRecordsList, overlayBestCombo, overlayMaxLines, records, -1);
+  }
+  renderRecordsInto(recordsListEl, bestComboEl, maxLinesEl, records, -1);
+
   overlay.classList.remove('hidden');
+}
+
+function openPauseMenu() {
+  pauseControlsPanel.classList.add('hidden');
+  controlsToggleBtn.setAttribute('aria-expanded', 'false');
+  startLevelSelect.value = String(startLevel);
+  pauseOverlay.classList.remove('hidden');
+  pauseOverlay.setAttribute('aria-hidden', 'false');
+  resumeBtn.focus();
+}
+
+function closePauseMenu() {
+  pauseOverlay.classList.add('hidden');
+  pauseOverlay.setAttribute('aria-hidden', 'true');
+}
+
+function togglePauseControlsPanel() {
+  const isHidden = pauseControlsPanel.classList.toggle('hidden');
+  controlsToggleBtn.setAttribute('aria-expanded', String(!isHidden));
 }
 
 function togglePause() {
   if (gameOver) return;
   paused = !paused;
   if (!paused) {
+    closePauseMenu();
     lastTime = performance.now();
     loop(lastTime);
   } else {
     cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+    openPauseMenu();
   }
 }
 
@@ -284,27 +504,48 @@ function toggleTheme() {
   applyTheme(theme === 'light' ? 'dark' : 'light');
 }
 
+function applySkin(key) {
+  skin = SKINS[key] ? key : 'retro';
+  const boardBg = SKINS[skin].boardBg;
+  canvas.style.backgroundColor = boardBg || '';
+  nextCanvas.style.backgroundColor = boardBg || '';
+  if (skinSelect) skinSelect.value = skin;
+  localStorage.setItem(SKIN_STORAGE_KEY, skin);
+  if (board) {
+    draw();
+    drawNext();
+  }
+}
+
 function init() {
   applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || 'dark');
+  applySkin(localStorage.getItem(SKIN_STORAGE_KEY) || 'retro');
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  level = startLevel;
+  combo = 0;
+  maxCombo = 0;
+  pendingScore = null;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = Math.max(100, 1000 - (level - 1) * 90);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
   spawn();
   updateHUD();
   overlay.classList.add('hidden');
+  overlayNewRecord.classList.add('hidden');
+  overlayRecords.classList.add('hidden');
+  renderAllRecords();
+  closePauseMenu();
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
+  if (e.code === 'KeyP' || e.code === 'Escape') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':
@@ -330,5 +571,24 @@ document.addEventListener('keydown', e => {
 
 restartBtn.addEventListener('click', init);
 themeToggleBtn.addEventListener('click', toggleTheme);
+skinSelect.addEventListener('change', e => applySkin(e.target.value));
+resumeBtn.addEventListener('click', togglePause);
+restartMenuBtn.addEventListener('click', () => {
+  closePauseMenu();
+  init();
+});
+controlsToggleBtn.addEventListener('click', togglePauseControlsPanel);
+startLevelSelect.addEventListener('change', e => {
+  startLevel = Number(e.target.value) || 1;
+});
+resetRecordsBtn.addEventListener('click', resetRecords);
+saveScoreBtn.addEventListener('click', saveScoreEntry);
+playerNameInput.addEventListener('keydown', e => {
+  if (e.code === 'Enter') {
+    e.preventDefault();
+    saveScoreEntry();
+  }
+});
 
+startLevel = 1;
 init();
