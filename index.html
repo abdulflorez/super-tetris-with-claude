@@ -52,7 +52,7 @@
             <li><kbd>↑</kbd> rotar</li>
             <li><kbd>↓</kbd> bajar</li>
             <li><kbd>Space</kbd> caída</li>
-            <li><kbd>P</kbd> pausa</li>
+            <li><kbd>P</kbd> / <kbd>Esc</kbd> pausa</li>
           </ul>
         </div>
       </aside>
@@ -62,7 +62,46 @@
       <div class="overlay-box">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
-        <button id="restart-btn">Reiniciar</button>
+        <button id="restart-btn" class="overlay-btn">Reiniciar</button>
+      </div>
+    </div>
+
+    <div id="pause-overlay" class="overlay hidden" aria-hidden="true">
+      <div class="overlay-box pause-menu">
+        <p id="pause-title">PAUSA</p>
+
+        <div class="pause-menu-actions">
+          <button id="resume-btn" class="overlay-btn" type="button">Reanudar</button>
+          <button id="restart-menu-btn" class="overlay-btn" type="button">Reiniciar</button>
+          <button id="controls-toggle-btn" class="overlay-btn secondary" type="button" aria-expanded="false">Ver controles</button>
+        </div>
+
+        <div id="pause-controls-panel" class="pause-controls-panel hidden">
+          <ul>
+            <li><kbd>←</kbd><kbd>→</kbd> mover</li>
+            <li><kbd>↑</kbd> rotar</li>
+            <li><kbd>↓</kbd> bajar</li>
+            <li><kbd>Space</kbd> caída</li>
+            <li><kbd>P</kbd> / <kbd>Esc</kbd> pausa</li>
+          </ul>
+        </div>
+
+        <div class="pause-level-select">
+          <label for="start-level-select">NIVEL INICIAL</label>
+          <select id="start-level-select">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+          </select>
+          <span class="pause-level-hint">Se aplica en la próxima partida</span>
+        </div>
       </div>
     </div>
   </div>
